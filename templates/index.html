@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapati Cafe - Home</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .active { border-bottom: 3px solid #D2691E; }
+    </style>
+</head>
+<body class="bg-[#FFF8DC] text-[#8B4513]">
+    <!-- Navigation -->
+    <nav class="bg-[#8B4513] text-white px-4 py-4 shadow-md">
+        <div class="container mx-auto flex flex-row flex-wrap justify-between items-center gap-4">
+            <a href="{{ url_for('index') }}" class="text-2xl font-bold tracking-tight flex-shrink-0">Chapati Cafe</a>
+            <div class="flex flex-row flex-wrap items-center gap-3 justify-end">
+                <a href="{{ url_for('index') }}" class="px-3 py-2 rounded-md transition duration-200 {% if request.endpoint == 'index' %}active{% endif %}">Home</a>
+                <a href="{{ url_for('menu') }}" class="px-3 py-2 rounded-md transition duration-200 {% if request.endpoint == 'menu' %}active{% endif %}">Menu</a>
+                {% if session.admin %}
+                    <a href="{{ url_for('logout') }}" class="p-2 rounded-md bg-[#FFF8DC] text-[#8B4513] hover:bg-[#F5DEB3]" title="Logout">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="p-2 rounded-md bg-[#FFF8DC] text-[#8B4513] hover:bg-[#F5DEB3]" title="Login">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative overflow-hidden">
+        <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1600&q=80" alt="Chapati Cafe hero" class="absolute inset-0 w-full h-full object-cover opacity-90">
+        <div class="absolute inset-0 bg-[#8B4513]/70"></div>
+        <div class="relative container mx-auto px-4 py-14 text-left sm:py-16 sm:px-6">
+            <h1 class="text-4xl sm:text-5xl font-extrabold mb-4 max-w-2xl">Warm Flavors, Crafted Daily</h1>
+            <p class="max-w-2xl text-base sm:text-lg text-[#FFF8DC] mb-8">Discover handcrafted chapatis, signature drinks, and sweet treats in a cozy cafe atmosphere.</p>
+            <a href="{{ url_for('menu') }}" class="inline-flex items-center justify-center rounded-full bg-[#FFF8DC] px-8 py-3 text-[#8B4513] font-semibold shadow-lg transition hover:bg-[#F5DEB3]">Our Menu</a>
+        </div>
+    </section>
+
+    <!-- Featured Menu -->
+    <section class="py-16 px-4 sm:px-6">
+        <div class="container mx-auto">
+            <div class="mb-8">
+                <div class="mb-4 max-w-2xl text-left">
+                    <h2 class="text-3xl font-bold">Featured Menu</h2>
+                    <p class="mt-2 text-[#5f320d]">A curated selection of our most-loved dishes and drinks.</p>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {% for item in items %}
+                <div class="bg-white rounded-3xl shadow-xl overflow-hidden flex flex-col">
+                    <img src="{{ item.image_url }}" alt="{{ item.name }}" class="h-44 w-full object-cover">
+                    <div class="p-5 flex flex-col flex-1">
+                        <span class="inline-block text-xs uppercase tracking-[0.25em] text-[#D2691E] mb-2">{{ item.category }}</span>
+                        <h3 class="text-xl font-semibold mb-3">{{ item.name }}</h3>
+                        <p class="text-sm text-[#5f3c1b] mb-4 flex-1">{{ item.description }}</p>
+                        <div class="mt-auto space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xl font-bold text-[#8B4513]">${{ "%.2f"|format(item.price) }}</span>
+                                <span class="rounded-full bg-[#FFF8DC] px-3 py-1 text-sm font-semibold text-[#8B4513]">Popular</span>
+                            </div>
+                            <a href="tel:+1234567890" class="inline-flex w-full items-center justify-center rounded-full bg-[#D2691E] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#A0522D]">Call to Order</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="mt-8 text-left">
+                <span class="inline-flex rounded-full bg-[#D2691E] px-6 py-2 text-white font-semibold shadow-lg transition hover:bg-[#A0522D]">View Menu</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-[#8B4513] text-white py-14 px-4 sm:px-6">
+        <div class="container mx-auto grid gap-10 lg:grid-cols-3">
+            <div>
+                <h3 class="text-2xl font-bold mb-4">Contact Us</h3>
+                <p class="mb-2">Phone: <a href="tel:+1234567890" class="text-[#FFF8DC]">+1 (234) 567-890</a></p>
+                <p class="mb-2">Location: 123 Chapati Lane, Flavor City</p>
+                <div class="flex items-center gap-3 mt-4">
+                    <a href="#" class="rounded-full bg-[#FFF8DC]/15 p-3 transition hover:bg-[#FFF8DC]/30"><span class="sr-only">Facebook</span>FB</a>
+                    <a href="#" class="rounded-full bg-[#FFF8DC]/15 p-3 transition hover:bg-[#FFF8DC]/30"><span class="sr-only">Instagram</span>IG</a>
+                    <a href="#" class="rounded-full bg-[#FFF8DC]/15 p-3 transition hover:bg-[#FFF8DC]/30"><span class="sr-only">Twitter</span>TW</a>
+                </div>
+            </div>
+            <div class="lg:col-span-2">
+                <h3 class="text-2xl font-bold mb-4">Find Us On the Map</h3>
+                <div class="overflow-hidden rounded-3xl border border-[#D2691E]/40 bg-white">
+                    <iframe class="w-full h-64" loading="lazy" allowfullscreen="" referrerpolicy="no-referrer-when-downgrade"
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3879.8299774084344!2d39.47160131744384!3d13.484572199999995!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x166afd0064ba3b7d%3A0xbf80f7a7974fc857!2zQ2hhcGF0aSBMb3VuZ2Ug4Ym74Y2T4YmyIOGIi-GLjeGKleGMhSDZhdi32LnZhSDYtNin2KjYp9iq2Yk!5e0!3m2!1sen!2set!4v1776023025993!5m2!1sen!2set">
+                    </iframe>
+                </div>
+            </div>
+        </div>
+        <div class="mt-10 text-center text-sm text-[#F8E9D2]">&copy; 2026 Chapati Cafe. All rights reserved.</div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapati Cafe - Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .active { border-bottom: 2px solid #D2691E; }
+    </style>
+</head>
+<body class="bg-[#FFF8DC] text-[#8B4513]">
+    <!-- Navigation -->
+    <nav class="bg-[#8B4513] text-white p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex space-x-4">
+                <a href="{{ url_for('index') }}" class="px-3 py-2 rounded {% if request.endpoint == 'index' %}active{% endif %}">Home</a>
+                <a href="{{ url_for('menu') }}" class="px-3 py-2 rounded {% if request.endpoint == 'menu' %}active{% endif %}">Menu</a>
+            </div>
+            <div>
+                <a href="{{ url_for('logout') }}" class="text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg></a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Add Item Form -->
+    <section class="py-8">
+        <div class="container mx-auto">
+            <h2 class="text-3xl font-bold mb-4">Add New Item</h2>
+            <form action="{{ url_for('add_item') }}" method="post" class="bg-white p-6 rounded-lg shadow-md">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="text" name="name" placeholder="Name" required class="border p-2 rounded">
+                    <input type="number" step="0.01" name="price" placeholder="Price" required class="border p-2 rounded">
+                    <input type="text" name="description" placeholder="Description" required class="border p-2 rounded md:col-span-2">
+                    <input type="url" name="image_url" placeholder="Image URL" required class="border p-2 rounded">
+                    <select name="category" required class="border p-2 rounded">
+                        <option value="Food">Food</option>
+                        <option value="Drink">Drink</option>
+                        <option value="Sweets">Sweets</option>
+                    </select>
+                </div>
+                <button type="submit" class="mt-4 bg-[#D2691E] text-white px-4 py-2 rounded">Add Item</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Items Table -->
+    <section class="py-8">
+        <div class="container mx-auto">
+            <h2 class="text-3xl font-bold mb-4">Manage Items</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white rounded-lg shadow-md">
+                    <thead>
+                        <tr class="bg-[#8B4513] text-white">
+                            <th class="py-2 px-4">ID</th>
+                            <th class="py-2 px-4">Name</th>
+                            <th class="py-2 px-4">Description</th>
+                            <th class="py-2 px-4">Price</th>
+                            <th class="py-2 px-4">Image URL</th>
+                            <th class="py-2 px-4">Category</th>
+                            <th class="py-2 px-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                        <tr class="border-b">
+                            <td class="py-2 px-4">{{ item.id }}</td>
+                            <form action="{{ url_for('update_item', id=item.id) }}" method="post" class="contents">
+                                <td class="py-2 px-4"><input type="text" name="name" value="{{ item.name }}" class="border p-1 w-full"></td>
+                                <td class="py-2 px-4"><input type="text" name="description" value="{{ item.description }}" class="border p-1 w-full"></td>
+                                <td class="py-2 px-4"><input type="number" step="0.01" name="price" value="{{ item.price }}" class="border p-1 w-full"></td>
+                                <td class="py-2 px-4"><input type="url" name="image_url" value="{{ item.image_url }}" class="border p-1 w-full"></td>
+                                <td class="py-2 px-4">
+                                    <select name="category" class="border p-1 w-full">
+                                        <option value="Food" {% if item.category == 'Food' %}selected{% endif %}>Food</option>
+                                        <option value="Drink" {% if item.category == 'Drink' %}selected{% endif %}>Drink</option>
+                                        <option value="Sweets" {% if item.category == 'Sweets' %}selected{% endif %}>Sweets</option>
+                                    </select>
+                                </td>
+                                <td class="py-2 px-4">
+                                    <button type="submit" class="bg-[#D2691E] text-white px-2 py-1 rounded mr-2">Update</button>
+                                    <a href="{{ url_for('delete_item', id=item.id) }}" class="bg-red-500 text-white px-2 py-1 rounded" onclick="return confirm('Are you sure?')">Delete</a>
+                                </td>
+                            </form>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-[#8B4513] text-white py-8">
+        <div class="container mx-auto text-center">
+            <p>&copy; 2023 Chapati Cafe. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>
