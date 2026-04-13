@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chapati Cafe - Menu</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .active { border-bottom: 3px solid #D2691E; }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body class="bg-[#FFF8DC] text-[#8B4513]">
     <!-- Navigation -->
@@ -31,14 +29,14 @@
     </nav>
 
     <!-- Hero Section -->
-    <section class="relative overflow-hidden">
-        <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1400&q=80" alt="Menu hero" class="absolute inset-0 w-full h-full object-cover opacity-90">
-        <div class="absolute inset-0 bg-[#8B4513]/75"></div>
-        <div class="relative container mx-auto px-4 py-12 text-left sm:py-14 sm:px-6">
-            <h1 class="text-3xl sm:text-4xl font-bold mb-3 max-w-2xl">Our Full Menu Collection</h1>
-            <p class="max-w-2xl text-base sm:text-lg text-[#FFF8DC] mb-6">Browse bowls, beverages, and sweets with cozy espresso and chapati favorites.</p>
-            <div class="inline-flex rounded-full bg-[#FFF8DC] p-1">
-                <a href="{{ url_for('menu', cat='All', page=1) }}" class="px-4 py-2 text-sm font-semibold text-[#8B4513] rounded-full bg-[#F8E3CB] hover:bg-[#D2691E] hover:text-white transition">Explore All</a>
+    <section class="relative overflow-hidden bg-gradient-to-r from-[#8B4513]/80 to-[#D2691E]/60">
+        <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1400&q=80" alt="Menu hero" class="absolute inset-0 w-full h-full object-cover">
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent via-[#8B4513]/40 to-[#8B4513]/70"></div>
+        <div class="relative container mx-auto px-4 py-16 text-center sm:py-20 sm:px-6">
+            <h1 class="text-4xl sm:text-5xl font-extrabold mb-4 text-white drop-shadow-lg">Discover Our Complete Menu</h1>
+            <p class="max-w-2xl mx-auto text-lg sm:text-xl text-[#FFF8DC] mb-8 drop-shadow-md">From savory dishes and refreshing beverages to irresistible sweets, explore our curated selection of authentic flavors.</p>
+            <div class="inline-flex rounded-full bg-white p-2 shadow-xl">
+                <a href="{{ url_for('menu', cat='All', page=1) }}" class="px-6 py-3 text-[#8B4513] font-bold text-lg rounded-full bg-[#F8E3CB] hover:bg-[#D2691E] hover:text-white transition hover:scale-105">Browse All Items</a>
             </div>
         </div>
     </section>

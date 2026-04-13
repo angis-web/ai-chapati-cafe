@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chapati Cafe - Home</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .active { border-bottom: 3px solid #D2691E; }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body class="bg-[#FFF8DC] text-[#8B4513]">
     <!-- Navigation -->
@@ -31,13 +29,13 @@
     </nav>
 
     <!-- Hero Section -->
-    <section class="relative overflow-hidden">
-        <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1600&q=80" alt="Chapati Cafe hero" class="absolute inset-0 w-full h-full object-cover opacity-90">
-        <div class="absolute inset-0 bg-[#8B4513]/70"></div>
-        <div class="relative container mx-auto px-4 py-14 text-left sm:py-16 sm:px-6">
-            <h1 class="text-4xl sm:text-5xl font-extrabold mb-4 max-w-2xl">Warm Flavors, Crafted Daily</h1>
-            <p class="max-w-2xl text-base sm:text-lg text-[#FFF8DC] mb-8">Discover handcrafted chapatis, signature drinks, and sweet treats in a cozy cafe atmosphere.</p>
-            <a href="{{ url_for('menu') }}" class="inline-flex items-center justify-center rounded-full bg-[#FFF8DC] px-8 py-3 text-[#8B4513] font-semibold shadow-lg transition hover:bg-[#F5DEB3]">Our Menu</a>
+    <section class="relative overflow-hidden bg-gradient-to-r from-[#8B4513]/80 to-[#D2691E]/60">
+        <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1600&q=80" alt="Chapati Cafe hero" class="absolute inset-0 w-full h-full object-cover">
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent via-[#8B4513]/40 to-[#8B4513]/70"></div>
+        <div class="relative container mx-auto px-4 py-20 text-center sm:py-24 sm:px-6">
+            <h1 class="text-5xl sm:text-6xl font-extrabold mb-6 text-white drop-shadow-lg">Welcome to Chapati Cafe</h1>
+            <p class="max-w-3xl mx-auto text-xl sm:text-2xl text-[#FFF8DC] mb-10 drop-shadow-md">Savor the authentic flavors of traditional Indian cuisine with our handcrafted chapatis, aromatic curries, refreshing drinks, and delightful sweets in a warm, inviting atmosphere.</p>
+            <a href="{{ url_for('menu') }}" class="inline-flex items-center justify-center rounded-full bg-white px-10 py-4 text-[#8B4513] font-bold text-lg shadow-xl transition hover:bg-[#F5DEB3] hover:scale-105">Explore Our Menu</a>
         </div>
     </section>
 
@@ -45,7 +43,7 @@
     <section class="py-16 px-4 sm:px-6">
         <div class="container mx-auto">
             <div class="mb-8">
-                <div class="mb-4 max-w-2xl text-left">
+                <div class="mb-4 max-w-2xl text-center">
                     <h2 class="text-3xl font-bold">Featured Menu</h2>
                     <p class="mt-2 text-[#5f320d]">A curated selection of our most-loved dishes and drinks.</p>
                 </div>
@@ -68,7 +66,7 @@
                 </div>
                 {% endfor %}
             </div>
-            <div class="mt-8 text-left">
+            <div class="mt-8 text-center">
                 <span class="inline-flex rounded-full bg-[#D2691E] px-6 py-2 text-white font-semibold shadow-lg transition hover:bg-[#A0522D]">View Menu</span>
             </div>
         </div>
