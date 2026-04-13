@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapati Cafe - Checkout</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="bg-[#FFF8DC] text-[#8B4513]">
+    <!-- Navigation -->
+    <nav class="bg-[#8B4513] text-white px-4 py-4 shadow-md">
+        <div class="container mx-auto flex flex-row flex-wrap justify-between items-center gap-4">
+            <a href="{{ url_for('index') }}" class="text-2xl font-bold tracking-tight flex-shrink-0">Chapati Cafe</a>
+            <div class="flex flex-row flex-wrap items-center gap-3 justify-end">
+                <a href="{{ url_for('index') }}" class="px-3 py-2 rounded-md transition duration-200">Home</a>
+                <a href="{{ url_for('menu') }}" class="px-3 py-2 rounded-md transition duration-200">Menu</a>
+                <a href="{{ url_for('cart') }}" class="px-3 py-2 rounded-md transition duration-200">Cart</a>
+                <span class="text-[#FFF8DC] px-2">Welcome, {{ session.username }}!</span>
+                <a href="{{ url_for('logout') }}" class="p-2 rounded-md bg-[#FFF8DC] text-[#8B4513] hover:bg-[#F5DEB3]" title="Logout">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Checkout Section -->
+    <section class="py-16 px-4 sm:px-6">
+        <div class="container mx-auto max-w-6xl">
+            <h1 class="text-4xl font-bold mb-8 text-center">Checkout</h1>
+            
+            <div class="grid lg:grid-cols-2 gap-8">
+                <!-- Order Summary -->
+                <div class="bg-white rounded-3xl shadow-xl p-6">
+                    <h2 class="text-2xl font-bold mb-6">Order Summary</h2>
+                    <div class="space-y-4">
+                        {% for item in cart_items %}
+                        <div class="flex items-center gap-4 py-3 border-b border-[#D2691E]/10 last:border-b-0">
+                            <img src="{{ item.image_url }}" alt="{{ item.name }}" class="w-16 h-16 object-cover rounded-lg">
+                            <div class="flex-1">
+                                <h3 class="font-semibold">{{ item.name }}</h3>
+                                <p class="text-sm text-[#5f3c1b]">Quantity: {{ item.quantity }}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-bold text-[#8B4513]">${{ "%.2f"|format(item.total) }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="mt-6 pt-6 border-t border-[#D2691E]/20">
+                        <div class="flex justify-between items-center text-xl font-bold">
+                            <span>Total:</span>
+                            <span class="text-[#D2691E]">${{ "%.2f"|format(total) }}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Delivery Information -->
+                <div class="bg-white rounded-3xl shadow-xl p-6">
+                    <h2 class="text-2xl font-bold mb-6">Delivery Information</h2>
+                    <form action="{{ url_for('checkout') }}" method="post">
+                        <div class="space-y-4">
+                            <div>
+                                <label for="delivery_address" class="block text-sm font-medium mb-2">Delivery Address</label>
+                                <textarea id="delivery_address" name="delivery_address" rows="3" required
+                                          class="w-full border border-[#D2691E]/30 p-3 rounded-lg focus:ring-2 focus:ring-[#D2691E] focus:border-transparent"
+                                          placeholder="Enter your full delivery address">{{ user.address }}</textarea>
+                            </div>
+                            <div>
+                                <label for="phone" class="block text-sm font-medium mb-2">Phone Number</label>
+                                <input type="tel" id="phone" name="phone" required
+                                       class="w-full border border-[#D2691E]/30 p-3 rounded-lg focus:ring-2 focus:ring-[#D2691E] focus:border-transparent"
+                                       value="{{ user.phone }}">
+                            </div>
+                            <div>
+                                <label for="special_instructions" class="block text-sm font-medium mb-2">Special Instructions (Optional)</label>
+                                <textarea id="special_instructions" name="special_instructions" rows="2"
+                                          class="w-full border border-[#D2691E]/30 p-3 rounded-lg focus:ring-2 focus:ring-[#D2691E] focus:border-transparent"
+                                          placeholder="Any special delivery instructions..."></textarea>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-8">
+                            <button type="submit" class="w-full bg-[#D2691E] text-white py-4 rounded-lg font-semibold text-lg hover:bg-[#A0522D] transition duration-200">
+                                Place Order - ${{ "%.2f"|format(total) }}
+                            </button>
+                        </div>
+                        
+                        <div class="mt-4 text-center">
+                            <a href="{{ url_for('cart') }}" class="text-[#8B4513] hover:text-[#D2691E] font-semibold">Back to Cart</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-[#8B4513] text-white py-14 px-4 sm:px-6">
+        <div class="container mx-auto text-center">
+            <p>&copy; 2026 Chapati Cafe. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

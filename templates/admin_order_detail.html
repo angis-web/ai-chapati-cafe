@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapati Cafe - Order #{{ order.id }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="bg-[#FFF8DC] text-[#8B4513]">
+    <!-- Navigation -->
+    <nav class="bg-[#8B4513] text-white px-4 py-4 shadow-md">
+        <div class="container mx-auto flex flex-row flex-wrap justify-between items-center gap-4">
+            <a href="{{ url_for('index') }}" class="text-2xl font-bold tracking-tight flex-shrink-0">Chapati Cafe</a>
+            <div class="flex flex-row flex-wrap items-center gap-3 justify-end">
+                <a href="{{ url_for('index') }}" class="px-3 py-2 rounded-md transition duration-200">Home</a>
+                <a href="{{ url_for('menu') }}" class="px-3 py-2 rounded-md transition duration-200">Menu</a>
+                <a href="{{ url_for('logout') }}" class="p-2 rounded-md bg-[#FFF8DC] text-[#8B4513] hover:bg-[#F5DEB3]" title="Logout">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Order Detail Section -->
+    <section class="py-8">
+        <div class="container mx-auto max-w-4xl">
+            <div class="mb-6">
+                <a href="{{ url_for('admin_orders') }}" class="text-[#8B4513] hover:text-[#D2691E] font-semibold mb-4 inline-block">&larr; Back to Orders</a>
+                <h1 class="text-3xl font-bold">Order #{{ order.id }}</h1>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Order Info -->
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-bold mb-4">Order Information</h2>
+                    <div class="space-y-2">
+                        <p><strong>Customer:</strong> {{ order.username }} ({{ order.full_name }})</p>
+                        <p><strong>Email:</strong> {{ order.email }}</p>
+                        <p><strong>Phone:</strong> {{ order.phone }}</p>
+                        <p><strong>Status:</strong> 
+                            <select onchange="updateStatus({{ order.id }}, this.value)" class="border p-1 rounded ml-2">
+                                <option value="pending" {% if order.status == 'pending' %}selected{% endif %}>Pending</option>
+                                <option value="confirmed" {% if order.status == 'confirmed' %}selected{% endif %}>Confirmed</option>
+                                <option value="preparing" {% if order.status == 'preparing' %}selected{% endif %}>Preparing</option>
+                                <option value="ready" {% if order.status == 'ready' %}selected{% endif %}>Ready</option>
+                                <option value="delivered" {% if order.status == 'delivered' %}selected{% endif %}>Delivered</option>
+                                <option value="cancelled" {% if order.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                            </select>
+                        </p>
+                        <p><strong>Order Date:</strong> {{ order.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                        <p><strong>Total Amount:</strong> ${{ "%.2f"|format(order.total_amount) }}</p>
+                    </div>
+                </div>
+                
+                <!-- Delivery Info -->
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-bold mb-4">Delivery Information</h2>
+                    <div class="space-y-2">
+                        <p><strong>Delivery Address:</strong></p>
+                        <p>{{ order.delivery_address }}</p>
+                        <p><strong>Phone:</strong> {{ order.phone }}</p>
+                        {% if order.special_instructions %}
+                        <p><strong>Special Instructions:</strong></p>
+                        <p>{{ order.special_instructions }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Order Items -->
+            <div class="bg-white p-6 rounded-lg shadow-md mt-6">
+                <h2 class="text-2xl font-bold mb-4">Order Items</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead>
+                            <tr class="border-b">
+                                <th class="py-2 px-4 text-left">Item</th>
+                                <th class="py-2 px-4 text-center">Quantity</th>
+                                <th class="py-2 px-4 text-right">Price</th>
+                                <th class="py-2 px-4 text-right">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in order_items %}
+                            <tr class="border-b">
+                                <td class="py-2 px-4">{{ item.name }}</td>
+                                <td class="py-2 px-4 text-center">{{ item.quantity }}</td>
+                                <td class="py-2 px-4 text-right">${{ "%.2f"|format(item.price) }}</td>
+                                <td class="py-2 px-4 text-right font-bold">${{ "%.2f"|format(item.total) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr class="border-t-2">
+                                <td colspan="3" class="py-2 px-4 text-right font-bold">Total:</td>
+                                <td class="py-2 px-4 text-right font-bold text-[#D2691E]">${{ "%.2f"|format(order.total_amount) }}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-[#8B4513] text-white py-8">
+        <div class="container mx-auto text-center">
+            <p>&copy; 2026 Chapati Cafe. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        function updateStatus(orderId, status) {
+            fetch('/admin/update_order_status/' + orderId, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'status=' + status
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Failed to update status');
+                }
+            });
+        }
+    </script>
+</body>
+</html>

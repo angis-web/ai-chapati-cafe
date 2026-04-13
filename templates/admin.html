@@ -9,14 +9,15 @@
 </head>
 <body class="bg-[#FFF8DC] text-[#8B4513]">
     <!-- Navigation -->
-    <nav class="bg-[#8B4513] text-white p-4">
-        <div class="container mx-auto flex justify-between items-center">
-            <div class="flex space-x-4">
-                <a href="{{ url_for('index') }}" class="px-3 py-2 rounded {% if request.endpoint == 'index' %}active{% endif %}">Home</a>
-                <a href="{{ url_for('menu') }}" class="px-3 py-2 rounded {% if request.endpoint == 'menu' %}active{% endif %}">Menu</a>
-            </div>
-            <div>
-                <a href="{{ url_for('logout') }}" class="text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg></a>
+    <nav class="bg-[#8B4513] text-white px-4 py-4 shadow-md">
+        <div class="container mx-auto flex flex-row flex-wrap justify-between items-center gap-4">
+            <a href="{{ url_for('index') }}" class="text-2xl font-bold tracking-tight flex-shrink-0">Chapati Cafe</a>
+            <div class="flex flex-row flex-wrap items-center gap-3 justify-end">
+                <a href="{{ url_for('index') }}" class="px-3 py-2 rounded-md transition duration-200">Home</a>
+                <a href="{{ url_for('menu') }}" class="px-3 py-2 rounded-md transition duration-200">Menu</a>
+                <a href="{{ url_for('logout') }}" class="p-2 rounded-md bg-[#FFF8DC] text-[#8B4513] hover:bg-[#F5DEB3]" title="Logout">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                </a>
             </div>
         </div>
     </nav>
@@ -36,6 +37,10 @@
                         <option value="Drink">Drink</option>
                         <option value="Sweets">Sweets</option>
                     </select>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="available" name="available" value="1" checked class="mr-2">
+                        <label for="available">Available</label>
+                    </div>
                 </div>
                 <button type="submit" class="mt-4 bg-[#D2691E] text-white px-4 py-2 rounded">Add Item</button>
             </form>
@@ -56,6 +61,7 @@
                             <th class="py-2 px-4">Price</th>
                             <th class="py-2 px-4">Image URL</th>
                             <th class="py-2 px-4">Category</th>
+                            <th class="py-2 px-4">Available</th>
                             <th class="py-2 px-4">Actions</th>
                         </tr>
                     </thead>
@@ -74,6 +80,9 @@
                                         <option value="Drink" {% if item.category == 'Drink' %}selected{% endif %}>Drink</option>
                                         <option value="Sweets" {% if item.category == 'Sweets' %}selected{% endif %}>Sweets</option>
                                     </select>
+                                </td>
+                                <td class="py-2 px-4">
+                                    <input type="checkbox" name="available" value="1" {% if item.available %}checked{% endif %} class="w-4 h-4">
                                 </td>
                                 <td class="py-2 px-4">
                                     <button type="submit" class="bg-[#D2691E] text-white px-2 py-1 rounded mr-2">Update</button>
