@@ -1,8 +1,6 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, flash
 import pyodbc
 from flask_session import Session
-from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime
 import os
 
 app = Flask(__name__)
@@ -62,21 +60,29 @@ def init_db():
     cursor.execute('SELECT COUNT(*) FROM MenuItems')
     if cursor.fetchone()[0] == 0:
         sample_items = [
-            ('Chapati', 'Freshly made flatbread', 2.50, 'https://source.unsplash.com/random/400x300/?chapati', 'Food', 1),
-            ('Chicken Curry', 'Spicy chicken curry with rice', 8.99, 'https://source.unsplash.com/random/400x300/?chicken-curry', 'Food', 1),
-            ('Masala Tea', 'Traditional spiced tea', 3.00, 'https://source.unsplash.com/random/400x300/?tea', 'Drink', 1),
-            ('Gulab Jamun', 'Sweet dumplings in syrup', 4.50, 'https://source.unsplash.com/random/400x300/?gulab-jamun', 'Sweety', 1),
-            ('Paneer Tikka', 'Grilled paneer skewers', 7.99, 'https://source.unsplash.com/random/400x300/?paneer-tikka', 'Food', 1),
-            ('Lassi', 'Yogurt drink', 3.50, 'https://source.unsplash.com/random/400x300/?lassi', 'Drink', 1),
-            ('Ras Malai', 'Cheese dumplings in sweetened milk', 5.00, 'https://source.unsplash.com/random/400x300/?ras-malai', 'Sweety', 1),
-            ('Biryani', 'Fragrant rice dish with meat', 10.99, 'https://source.unsplash.com/random/400x300/?biryani', 'Food', 1),
-            ('Coffee', 'Fresh brewed coffee', 2.50, 'https://source.unsplash.com/random/400x300/?coffee', 'Drink', 1),
-            ('Jalebi', 'Crispy sweet spirals', 3.99, 'https://source.unsplash.com/random/400x300/?jalebi', 'Sweety', 1),
-            ('Naan', 'Leavened flatbread', 2.00, 'https://source.unsplash.com/random/400x300/?naan', 'Food', 1),
-            ('Mango Lassi', 'Mango flavored yogurt drink', 4.00, 'https://source.unsplash.com/random/400x300/?mango-lassi', 'Drink', 1),
+            ('Chapati', 'Freshly made flatbread', 2.50, 'images/chapati-img1.png', 'Food', 1),
+            ('Chicken Curry', 'Spicy chicken curry with rice', 8.99, 'images/chapati-chicken.png', 'Food', 1),
+            ('Masala Tea', 'Traditional spiced tea', 3.00, 'images/tea-tea.jpg', 'Drink', 1),
+            ('Gulab Jamun', 'Sweet dumplings in syrup', 4.50, 'images/juice-power.jpg', 'Sweets', 1),
+            ('Paneer Tikka', 'Grilled paneer skewers', 7.99, 'images/meat.jpg', 'Food', 1),
+            ('Lassi', 'Yogurt drink', 3.50, 'images/milk-milk.jpg', 'Drink', 1),
+            ('Ras Malai', 'Cheese dumplings in sweetened milk', 5.00, 'images/milk-with-biscuits.jpg', 'Sweets', 1),
+            ('Biryani', 'Fragrant rice dish with meat', 10.99, 'images/pasta-shrimp-spaghetti-with-fresh-herbs.jpg', 'Food', 1),
+            ('Coffee', 'Fresh brewed coffee', 2.50, 'images/coffee-cappuccino.jpg', 'Drink', 1),
+            ('Jalebi', 'Crispy sweet spirals', 3.99, 'images/chips.jpg', 'Sweets', 1),
+            ('Naan', 'Leavened flatbread', 2.00, 'images/chapati-img2.png', 'Food', 1),
+            ('Mango Lassi', 'Mango flavored yogurt drink', 4.00, 'images/juice-mango.jpg', 'Drink', 1),
+            ('Burger', 'Juicy burger with fresh lettuce', 6.99, 'images/burger-cc-with-fresh-lettuce.jpg', 'Food', 1),
+            ('Chips', 'Crispy potato chips', 2.99, 'images/chips-potato.jpg', 'Food', 1),
+            ('Orange Juice', 'Fresh orange juice', 3.50, 'images/juice-orange.jpg', 'Drink', 1),
+            ('Pizza', 'Pepperoni pizza', 9.99, 'images/pizza-pepperonia.jpg', 'Food', 1),
+            ('Spaghetti', 'Classic spaghetti pasta', 7.50, 'images/pasta-spaghetti.jpg', 'Food', 1),
         ]
         for item in sample_items:
             cursor.execute('INSERT INTO MenuItems (name, description, price, image_url, category, available) VALUES (?, ?, ?, ?, ?, ?)', item)
+    
+    # Update category from Sweety to Sweets
+    cursor.execute("UPDATE MenuItems SET category = 'Sweets' WHERE category = 'Sweety'")
     
     conn.commit()
     conn.close()
@@ -120,7 +126,7 @@ def menu():
     page = int(request.args.get('page', 1))
     cat = request.args.get('cat', 'All')
     search = request.args.get('search', '')
-    offset = (page - 1) * 18
+    offset = (page - 1) * 10
     
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -136,7 +142,7 @@ def menu():
         query += ' AND (name LIKE ? OR description LIKE ?)'
         params.extend([f'%{search}%', f'%{search}%'])
     
-    query += ' ORDER BY id OFFSET ? ROWS FETCH NEXT 18 ROWS ONLY'
+    query += ' ORDER BY id OFFSET ? ROWS FETCH NEXT 10 ROWS ONLY'
     params.append(offset)
     
     cursor.execute(query, params)
@@ -154,7 +160,7 @@ def menu():
     
     cursor.execute(count_query, count_params)
     total = cursor.fetchone()[0]
-    total_pages = max(1, (total + 17) // 18)
+    total_pages = max(1, (total + 9) // 10)
     conn.close()
     
     return render_template('menu.html', items=items, page=page, total_pages=total_pages, cat=cat, search=search)
