@@ -1,28 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chapati Cafe - Login</title>
-    <link rel="icon" href="{{ url_for('static', filename='images/chapati-logo.jpg') }}">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body class="bg-[#FFF8DC] text-[#8B4513]">
-    <!-- Navigation -->
-    <nav class="bg-[#8B4513] text-white px-4 py-4 shadow-md">
-        <div class="container mx-auto flex flex-row flex-wrap justify-between items-center gap-4">
-            <a href="{{ url_for('index') }}" class="text-2xl font-bold tracking-tight flex-shrink-0">Chapati Cafe</a>
-            <div class="flex flex-row flex-wrap items-center gap-3 justify-end">
-                <a href="{{ url_for('index') }}" class="px-3 py-2 rounded-md transition duration-200 {% if request.endpoint == 'index' %}border-b-2 border-orange-400{% endif %}">Home</a>
-                <a href="{{ url_for('menu') }}" class="px-3 py-2 rounded-md transition duration-200 {% if request.endpoint == 'menu' %}border-b-2 border-orange-400{% endif %}">Menu</a>
-                <a href="{{ url_for('login') }}" class="p-2 rounded-md bg-[#FFF8DC] text-[#8B4513] hover:bg-[#F5DEB3]" title="Admin">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                </a>
-            </div>
-        </div>
-    </nav>
+{% extends 'base.html' %}
 
+{% block title %}Login{% endblock %}
+
+{% block content %}
     <!-- Login Form -->
     <section class="py-20">
         <div class="container mx-auto max-w-md">
@@ -52,11 +32,4 @@
         </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="bg-[#8B4513] text-white py-8">
-        <div class="container mx-auto text-center">
-            <p>&copy; 2023 Chapati Cafe. All rights reserved.</p>
-        </div>
-    </footer>
-</body>
-</html>
+{% endblock %}
