@@ -86,26 +86,6 @@ def init_db():
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    sample_items = [
-        ('Chapati', '', 2.50, 'images/chapati-img1.png', 'Food', 1),
-        ('Chicken Curry', '', 8.99, 'images/chapati-chicken.png', 'Food', 1),
-        ('Masala Tea', '', 3.00, 'images/tea-tea.jpg', 'Drink', 1),
-        ('Gulab Jamun', '', 4.50, 'images/juice-power.jpg', 'Sweets', 1),
-        ('Paneer Tikka', '', 7.99, 'images/pizza-meat-and-vegetables.jpg', 'Food', 1),
-        ('Lassi', '', 3.50, 'images/juice-avocado.jpg', 'Drink', 1),
-        ('Ras Malai', '', 5.00, 'images/milk-with-biscuits.jpg', 'Sweets', 1),
-        ('Biryani', '', 10.99, 'images/pasta-shrimp-spaghetti-with-fresh-herbs.jpg', 'Food', 1),
-        ('Coffee', '', 2.50, 'images/coffee-cappuccino.jpg', 'Drink', 1),
-        ('Jalebi', '', 3.99, 'images/chips.jpg', 'Sweets', 1),
-        ('Naan', '', 2.00, 'images/chapati-alchole.png', 'Food', 1),
-        ('Mango Lassi', '', 4.00, 'images/juice-mango.jpg', 'Drink', 1),
-        ('Burger', '', 6.99, 'images/burger-cc-with-fresh-lettuce.jpg', 'Food', 1),
-        ('Chips', '', 2.99, 'images/chips-potato.jpg', 'Food', 1),
-        ('Orange Juice', '', 3.50, 'images/juice-orange.jpg', 'Drink', 1),
-        ('Pizza', '', 9.99, 'images/pizza-pepperonia.jpg', 'Food', 1),
-        ('Spaghetti', '', 7.50, 'images/pasta-spaghetti.jpg', 'Food', 1),
-    ]
-    
     if USE_POSTGRES:
         # Postgres
         try:
@@ -130,10 +110,6 @@ def init_db():
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
             ''')
-        
-        cursor.execute('SELECT COUNT(*) FROM MenuItems')
-        if cursor.fetchone()[0] == 0:
-            cursor.executemany('INSERT INTO MenuItems (name, description, price, image_url, category, available) VALUES (%s, %s, %s, %s, %s, %s)', sample_items)
         
         cursor.execute("UPDATE MenuItems SET category = 'Sweets' WHERE category = 'Sweety'")
     else:
@@ -160,10 +136,6 @@ def init_db():
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )
             ''')
-        
-        cursor.execute('SELECT COUNT(*) FROM MenuItems')
-        if cursor.fetchone()[0] == 0:
-            cursor.executemany('INSERT INTO MenuItems (name, description, price, image_url, category, available) VALUES (?, ?, ?, ?, ?, ?)', sample_items)
         
         cursor.execute("UPDATE MenuItems SET category = 'Sweets' WHERE category = 'Sweety'")
     
@@ -331,6 +303,9 @@ def delete_item(id):
     conn.commit()
     conn.close()
     return redirect(url_for('admin'))
+
+# For Vercel deployment
+application = app
 
 if __name__ == '__main__':
     app.run(debug=True)
