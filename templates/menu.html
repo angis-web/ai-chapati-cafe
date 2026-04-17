@@ -50,7 +50,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {% for item in items %}
                 <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-[#D2691E]/10 flex flex-col">
-                    <img src="{{ url_for('static', filename=item.image_url) }}" alt="{{ item.name }}" class="w-full h-44 object-cover">
+                    <img src="{% if item.image_url and item.image_url.startswith('http') %}{{ item.image_url }}{% else %}{{ url_for('static', filename=item.image_url or '') }}{% endif %}" alt="{{ item.name }}" class="w-full h-44 object-cover">
                     <div class="p-5 flex flex-col flex-1">
                         <div class="flex items-center justify-between mb-3">
                             <h3 class="text-lg font-semibold">{{ item.name }}</h3>

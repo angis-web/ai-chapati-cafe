@@ -1,8 +1,20 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
-import pyodbc
-from flask_session import Session
 import os
 import re
+
+try:
+    import psycopg2
+    HAS_PSYCOPG2 = True
+except ImportError:
+    HAS_PSYCOPG2 = False
+
+try:
+    import sqlite3
+    HAS_SQLITE = True
+except ImportError:
+    HAS_SQLITE = False
+
+from flask_session import Session
 
 
 def load_dotenv(dotenv_path='.env'):
@@ -29,13 +41,8 @@ app.secret_key = os.environ.get('SECRET_KEY', 'your_secret_key_here') or 'your_s
 app.config['SESSION_TYPE'] = 'filesystem'
 Session(app)
 
-DB_SERVER = os.environ.get('DB_SERVER', 'localhost') or 'localhost'
-DB_NAME = os.environ.get('DB_NAME', 'Menu_list') or 'Menu_list'
-DB_UID = os.environ.get('DB_UID', 'Menu_List') or 'Menu_List'
-DB_PWD = os.environ.get('DB_PWD', 'menu_list') or 'menu_list'
-
-conn_str = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={DB_SERVER};DATABASE={DB_NAME};UID={DB_UID};PWD={DB_PWD}'
-master_conn_str = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={DB_SERVER};DATABASE=master;UID={DB_UID};PWD={DB_PWD}'
+DATABASE_URL = os.environ.get('DATABASE_URL')
+USE_POSTGRES = DATABASE_URL and HAS_PSYCOPG2
 
 
 def get_description_from_image(image_url):
@@ -57,90 +64,132 @@ def image_description_filter(image_url):
 
 
 def get_db_connection():
-    return pyodbc.connect(conn_str)
-
-def ensure_database():
-    try:
-        conn = pyodbc.connect(conn_str)
-        conn.close()
-    except:
-        # Database doesn't exist, create it
-        conn = pyodbc.connect(master_conn_str)
-        cursor = conn.cursor()
-        cursor.execute(f'CREATE DATABASE [{DB_NAME}]')
-        conn.commit()
-        conn.close()
+    if USE_POSTGRES:
+        return psycopg2.connect(DATABASE_URL)
+    else:
+        import tempfile
+        db_path = os.path.join(tempfile.gettempdir(), 'database.db')
+        return sqlite3.connect(db_path)
 
 def init_db():
-    ensure_database()
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    # Check if MenuItems table exists and add missing columns
-    try:
-        cursor.execute("SELECT TOP 1 * FROM MenuItems")
-        columns = [column[0] for column in cursor.description]
+    if USE_POSTGRES:
+        # Postgres
+        try:
+            cursor.execute("SELECT * FROM MenuItems LIMIT 1")
+            columns = [desc[0] for desc in cursor.description]
+            
+            if 'available' not in columns:
+                cursor.execute('ALTER TABLE MenuItems ADD COLUMN available BOOLEAN DEFAULT TRUE')
+            
+            if 'created_at' not in columns:
+                cursor.execute('ALTER TABLE MenuItems ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP')
+        except:
+            cursor.execute('''
+            CREATE TABLE MenuItems (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(100),
+                description TEXT,
+                price DECIMAL(10,2),
+                image_url VARCHAR(500),
+                category VARCHAR(50),
+                available BOOLEAN DEFAULT TRUE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            ''')
         
-        if 'available' not in columns:
-            cursor.execute('ALTER TABLE MenuItems ADD available BIT DEFAULT 1')
+        cursor.execute('SELECT COUNT(*) FROM MenuItems')
+        if cursor.fetchone()[0] == 0:
+            sample_items = [
+                ('Chapati', '', 2.50, 'images/chapati-img1.png', 'Food', 1),
+                ('Chicken Curry', '', 8.99, 'images/chapati-chicken.png', 'Food', 1),
+                ('Masala Tea', '', 3.00, 'images/tea-tea.jpg', 'Drink', 1),
+                ('Gulab Jamun', '', 4.50, 'images/juice-power.jpg', 'Sweets', 1),
+                ('Paneer Tikka', '', 7.99, 'images/pizza-meat-and-vegetables.jpg', 'Food', 1),
+                ('Lassi', '', 3.50, 'images/juice-avocado.jpg', 'Drink', 1),
+                ('Ras Malai', '', 5.00, 'images/milk-with-biscuits.jpg', 'Sweets', 1),
+                ('Biryani', '', 10.99, 'images/pasta-shrimp-spaghetti-with-fresh-herbs.jpg', 'Food', 1),
+                ('Coffee', '', 2.50, 'images/coffee-cappuccino.jpg', 'Drink', 1),
+                ('Jalebi', '', 3.99, 'images/chips.jpg', 'Sweets', 1),
+                ('Naan', '', 2.00, 'images/chapati-alchole.png', 'Food', 1),
+                ('Mango Lassi', '', 4.00, 'images/juice-mango.jpg', 'Drink', 1),
+                ('Burger', '', 6.99, 'images/burger-cc-with-fresh-lettuce.jpg', 'Food', 1),
+                ('Chips', '', 2.99, 'images/chips-potato.jpg', 'Food', 1),
+                ('Orange Juice', '', 3.50, 'images/juice-orange.jpg', 'Drink', 1),
+                ('Pizza', '', 9.99, 'images/pizza-pepperonia.jpg', 'Food', 1),
+                ('Spaghetti', '', 7.50, 'images/pasta-spaghetti.jpg', 'Food', 1),
+            ]
+            cursor.executemany('INSERT INTO MenuItems (name, description, price, image_url, category, available) VALUES (%s, %s, %s, %s, %s, %s)', sample_items)
         
-        if 'created_at' not in columns:
-            cursor.execute('ALTER TABLE MenuItems ADD created_at DATETIME DEFAULT GETDATE()')
-    except:
-        # Table doesn't exist, create it
-        cursor.execute('''
-        CREATE TABLE MenuItems (
-            id INT IDENTITY(1,1) PRIMARY KEY,
-            name NVARCHAR(100),
-            description NVARCHAR(500),
-            price DECIMAL(10,2),
-            image_url NVARCHAR(500),
-            category NVARCHAR(50),
-            available BIT DEFAULT 1,
-            created_at DATETIME DEFAULT GETDATE()
-        )
-        ''')
-    
-    # Insert sample data if MenuItems is empty
-    cursor.execute('SELECT COUNT(*) FROM MenuItems')
-    if cursor.fetchone()[0] == 0:
-        sample_items = [
-            ('Chapati', '', 2.50, 'images/chapati-img1.png', 'Food', 1),
-            ('Chicken Curry', '', 8.99, 'images/chapati-chicken.png', 'Food', 1),
-            ('Masala Tea', '', 3.00, 'images/tea-tea.jpg', 'Drink', 1),
-            ('Gulab Jamun', '', 4.50, 'images/juice-power.jpg', 'Sweets', 1),
-            ('Paneer Tikka', '', 7.99, 'images/meat.jpg', 'Food', 1),
-            ('Lassi', '', 3.50, 'images/milk-milk.jpg', 'Drink', 1),
-            ('Ras Malai', '', 5.00, 'images/milk-with-biscuits.jpg', 'Sweets', 1),
-            ('Biryani', '', 10.99, 'images/pasta-shrimp-spaghetti-with-fresh-herbs.jpg', 'Food', 1),
-            ('Coffee', '', 2.50, 'images/coffee-cappuccino.jpg', 'Drink', 1),
-            ('Jalebi', '', 3.99, 'images/chips.jpg', 'Sweets', 1),
-            ('Naan', '', 2.00, 'images/chapati-img2.png', 'Food', 1),
-            ('Mango Lassi', '', 4.00, 'images/juice-mango.jpg', 'Drink', 1),
-            ('Burger', '', 6.99, 'images/burger-cc-with-fresh-lettuce.jpg', 'Food', 1),
-            ('Chips', '', 2.99, 'images/chips-potato.jpg', 'Food', 1),
-            ('Orange Juice', '', 3.50, 'images/juice-orange.jpg', 'Drink', 1),
-            ('Pizza', '', 9.99, 'images/pizza-pepperonia.jpg', 'Food', 1),
-            ('Spaghetti', '', 7.50, 'images/pasta-spaghetti.jpg', 'Food', 1),
-        ]
-        for item in sample_items:
-            cursor.execute('INSERT INTO MenuItems (name, description, price, image_url, category, available) VALUES (?, ?, ?, ?, ?, ?)', item)
-    
-    # Update category from Sweety to Sweets
-    cursor.execute("UPDATE MenuItems SET category = 'Sweets' WHERE category = 'Sweety'")
+        cursor.execute("UPDATE MenuItems SET category = 'Sweets' WHERE category = 'Sweety'")
+    else:
+        # SQLite
+        try:
+            cursor.execute("SELECT * FROM MenuItems LIMIT 1")
+            columns = [desc[0] for desc in cursor.description]
+            
+            if 'available' not in columns:
+                cursor.execute('ALTER TABLE MenuItems ADD COLUMN available INTEGER DEFAULT 1')
+            
+            if 'created_at' not in columns:
+                cursor.execute('ALTER TABLE MenuItems ADD COLUMN created_at DATETIME DEFAULT CURRENT_TIMESTAMP')
+        except:
+            cursor.execute('''
+            CREATE TABLE MenuItems (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT,
+                description TEXT,
+                price REAL,
+                image_url TEXT,
+                category TEXT,
+                available INTEGER DEFAULT 1,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+            ''')
+        
+        cursor.execute('SELECT COUNT(*) FROM MenuItems')
+        if cursor.fetchone()[0] == 0:
+            sample_items = [
+                ('Chapati', '', 2.50, 'images/chapati-img1.png', 'Food', 1),
+                ('Chicken Curry', '', 8.99, 'images/chapati-chicken.png', 'Food', 1),
+                ('Masala Tea', '', 3.00, 'images/tea-tea.jpg', 'Drink', 1),
+                ('Gulab Jamun', '', 4.50, 'images/juice-power.jpg', 'Sweets', 1),
+                ('Paneer Tikka', '', 7.99, 'images/pizza-meat-and-vegetables.jpg', 'Food', 1),
+                ('Lassi', '', 3.50, 'images/juice-avocado.jpg', 'Drink', 1),
+                ('Ras Malai', '', 5.00, 'images/milk-with-biscuits.jpg', 'Sweets', 1),
+                ('Biryani', '', 10.99, 'images/pasta-shrimp-spaghetti-with-fresh-herbs.jpg', 'Food', 1),
+                ('Coffee', '', 2.50, 'images/coffee-cappuccino.jpg', 'Drink', 1),
+                ('Jalebi', '', 3.99, 'images/chips.jpg', 'Sweets', 1),
+                ('Naan', '', 2.00, 'images/chapati-alchole.png', 'Food', 1),
+                ('Mango Lassi', '', 4.00, 'images/juice-mango.jpg', 'Drink', 1),
+                ('Burger', '', 6.99, 'images/burger-cc-with-fresh-lettuce.jpg', 'Food', 1),
+                ('Chips', '', 2.99, 'images/chips-potato.jpg', 'Food', 1),
+                ('Orange Juice', '', 3.50, 'images/juice-orange.jpg', 'Drink', 1),
+                ('Pizza', '', 9.99, 'images/pizza-pepperonia.jpg', 'Food', 1),
+                ('Spaghetti', '', 7.50, 'images/pasta-spaghetti.jpg', 'Food', 1),
+            ]
+            cursor.executemany('INSERT INTO MenuItems (name, description, price, image_url, category, available) VALUES (?, ?, ?, ?, ?, ?)', sample_items)
+        
+        cursor.execute("UPDATE MenuItems SET category = 'Sweets' WHERE category = 'Sweety'")
     
     conn.commit()
     conn.close()
 
-ensure_database()
 init_db()
 
 @app.route('/')
 def index():
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('SELECT TOP 4 * FROM MenuItems WHERE available = 1 ORDER BY NEWID()')
-    items = cursor.fetchall()
+    if USE_POSTGRES:
+        cursor.execute('SELECT * FROM MenuItems WHERE available = %s ORDER BY RANDOM() LIMIT 4', (True,))
+    else:
+        cursor.execute('SELECT * FROM MenuItems WHERE available = ? ORDER BY RANDOM() LIMIT 4', (1,))
+    rows = cursor.fetchall()
+    columns = [desc[0] for desc in cursor.description]
+    items = [dict(zip(columns, row)) for row in rows]
     conn.close()
     
     return render_template('index.html', items=items)
@@ -176,35 +225,39 @@ def menu():
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    query = 'SELECT * FROM MenuItems WHERE available = 1'
-    params = []
+    query = 'SELECT * FROM MenuItems WHERE available = %s' if USE_POSTGRES else 'SELECT * FROM MenuItems WHERE available = ?'
+    params = [True] if USE_POSTGRES else [1]
     
     if cat != 'All':
-        query += ' AND category = ?'
+        query += ' AND category = %s' if USE_POSTGRES else ' AND category = ?'
         params.append(cat)
     
     if search:
-        query += ' AND (name LIKE ? OR description LIKE ?)'
-        params.extend([f'%{search}%', f'%{search}%'])
+        query += ' AND (name LIKE %s OR description LIKE %s)' if USE_POSTGRES else ' AND (name LIKE ? OR description LIKE ?)'
+        search_param = f'%{search}%'
+        params.extend([search_param, search_param])
     
-    query += ' ORDER BY id OFFSET ? ROWS FETCH NEXT 10 ROWS ONLY'
+    query += ' ORDER BY id LIMIT 10 OFFSET %s' if USE_POSTGRES else ' ORDER BY id LIMIT 10 OFFSET ?'
     params.append(offset)
     
     cursor.execute(query, params)
-    items = cursor.fetchall()
+    rows = cursor.fetchall()
+    columns = [desc[0] for desc in cursor.description]
+    items = [dict(zip(columns, row)) for row in rows]
     
     # Get total count
-    count_query = 'SELECT COUNT(*) FROM MenuItems WHERE available = 1'
-    count_params = []
+    count_query = 'SELECT COUNT(*) FROM MenuItems WHERE available = %s' if USE_POSTGRES else 'SELECT COUNT(*) FROM MenuItems WHERE available = ?'
+    count_params = [True] if USE_POSTGRES else [1]
     if cat != 'All':
-        count_query += ' AND category = ?'
+        count_query += ' AND category = %s' if USE_POSTGRES else ' AND category = ?'
         count_params.append(cat)
     if search:
-        count_query += ' AND (name LIKE ? OR description LIKE ?)'
-        count_params.extend([f'%{search}%', f'%{search}%'])
+        count_query += ' AND (name LIKE %s OR description LIKE %s)' if USE_POSTGRES else ' AND (name LIKE ? OR description LIKE ?)'
+        count_params.extend([search_param, search_param])
     
     cursor.execute(count_query, count_params)
-    total = cursor.fetchone()[0]
+    result = cursor.fetchone()
+    total = result[0] if result else 0
     total_pages = max(1, (total + 9) // 10)
     conn.close()
     
@@ -227,7 +280,9 @@ def admin():
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute('SELECT * FROM MenuItems ORDER BY id')
-    items = cursor.fetchall()
+    rows = cursor.fetchall()
+    columns = [desc[0] for desc in cursor.description]
+    items = [dict(zip(columns, row)) for row in rows]
     conn.close()
     return render_template('admin.html', items=items)
 
@@ -242,12 +297,12 @@ def add_item():
     price = request.form['price']
     image_url = request.form['image_url']
     category = request.form['category']
-    available = request.form.get('available', '1') == '1'
+    available = 'available' in request.form
     
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute('INSERT INTO MenuItems (name, description, price, image_url, category, available) VALUES (?, ?, ?, ?, ?, ?)',
-                 name, description, price, image_url, category, available)
+                 (name, description, price, image_url, category, available))
     conn.commit()
     conn.close()
     return redirect(url_for('admin'))
@@ -262,12 +317,12 @@ def update_item(id):
     price = request.form['price']
     image_url = request.form['image_url']
     category = request.form['category']
-    available = request.form.get('available', '1') == '1'
+    available = 'available' in request.form
     
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute('UPDATE MenuItems SET name=?, description=?, price=?, image_url=?, category=?, available=? WHERE id=?',
-                 name, description, price, image_url, category, available, id)
+                 (name, description, price, image_url, category, available, id))
     conn.commit()
     conn.close()
     return redirect(url_for('admin'))
@@ -279,7 +334,7 @@ def delete_item(id):
     
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('DELETE FROM MenuItems WHERE id=?', id)
+    cursor.execute('DELETE FROM MenuItems WHERE id=?', (id,))
     conn.commit()
     conn.close()
     return redirect(url_for('admin'))
