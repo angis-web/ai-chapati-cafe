@@ -1,3 +1,43 @@
 .active {
     border-bottom: 3px solid #D2691E;
 }
+
+@media (max-width: 640px) {
+    /* Home and menu mobile font size adjustments */
+    h1, .text-5xl, .text-4xl {
+        font-size: 1.8rem !important;
+        line-height: 1.1 !important;
+    }
+
+    h2, .text-3xl {
+        font-size: 1.4rem !important;
+        line-height: 1.2 !important;
+    }
+
+    h3, .text-2xl {
+        font-size: 1.15rem !important;
+    }
+
+    p, .text-xl, .text-lg, .text-base {
+        font-size: 0.95rem !important;
+        line-height: 1.5 !important;
+    }
+
+    .container .px-4,
+    .container .px-6,
+    .container .py-16,
+    .container .py-20,
+    .container .py-24 {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+        padding-top: 1rem !important;
+        padding-bottom: 1rem !important;
+    }
+
+    .container .text-sm,
+    .container .text-xs,
+    .container .px-3,
+    .container .py-2 {
+        font-size: 0.85rem !important;
+    }
+}

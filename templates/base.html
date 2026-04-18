@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chapati Cafe - {% block title %}{% endblock %}</title>
-    <link rel="icon" href="https://res.cloudinary.com/dn72tcyi3/image/upload/v1776413691/chapati-logo_ihsxn1.jpg">
+    <link rel="icon" href="https://res.cloudinary.com/dn72tcyi3/image/upload/v1776473087/chapati-logo-normal_hmefzf.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     {% block extra_head %}{% endblock %}
@@ -12,7 +12,9 @@
 <body class="min-h-screen flex flex-col bg-[#FFF8DC] text-[#8B4513]">
     <nav class="bg-[#8B4513] text-white px-4 py-4 shadow-md">
         <div class="container mx-auto flex justify-between items-center gap-4">
-            <a href="{{ url_for('index') }}" class="text-2xl font-bold tracking-tight flex-shrink-0">Chapati Cafe</a>
+            <a href="{{ url_for('index') }}" class="flex-shrink-0">
+                <img src="https://res.cloudinary.com/dn72tcyi3/image/upload/v1776473087/chapati-logo-normal_hmefzf.png" alt="Chapati Cafe" class="h-10 w-auto">
+            </a>
             <div class="flex items-center gap-3">
                 <a href="{{ url_for('index') }}" class="px-3 py-2 rounded-md transition duration-200 {% if request.endpoint == 'index' %}border-b-2 border-orange-400{% endif %}">Home</a>
                 <a href="{{ url_for('menu') }}" class="px-3 py-2 rounded-md transition duration-200 {% if request.endpoint == 'menu' %}border-b-2 border-orange-400{% endif %}">Menu</a>

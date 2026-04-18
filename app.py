@@ -271,8 +271,9 @@ def add_item():
     
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('INSERT INTO MenuItems (name, description, price, image_url, category, available) VALUES (?, ?, ?, ?, ?, ?)',
-                 (name, description, price, image_url, category, available))
+    placeholder = '%s' if USE_POSTGRES else '?'
+    query = f'INSERT INTO MenuItems (name, description, price, image_url, category, available) VALUES ({placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder})'
+    cursor.execute(query, (name, description, price, image_url, category, available))
     conn.commit()
     conn.close()
     return redirect(url_for('admin'))
@@ -291,8 +292,9 @@ def update_item(id):
     
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('UPDATE MenuItems SET name=?, description=?, price=?, image_url=?, category=?, available=? WHERE id=?',
-                 (name, description, price, image_url, category, available, id))
+    placeholder = '%s' if USE_POSTGRES else '?'
+    query = f'UPDATE MenuItems SET name={placeholder}, description={placeholder}, price={placeholder}, image_url={placeholder}, category={placeholder}, available={placeholder} WHERE id={placeholder}'
+    cursor.execute(query, (name, description, price, image_url, category, available, id))
     conn.commit()
     conn.close()
     return redirect(url_for('admin'))
@@ -304,7 +306,9 @@ def delete_item(id):
     
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('DELETE FROM MenuItems WHERE id=?', (id,))
+    placeholder = '%s' if USE_POSTGRES else '?'
+    query = f'DELETE FROM MenuItems WHERE id={placeholder}'
+    cursor.execute(query, (id,))
     conn.commit()
     conn.close()
     return redirect(url_for('admin'))
